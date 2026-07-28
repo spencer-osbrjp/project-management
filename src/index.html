@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>project-management</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="main.js" defer></script>
+  </head>
+  <body>
+    <header id="topbar">
+      <span id="repo-name" class="muted">No repository connected</span>
+      <span id="repo-branch" class="badge" hidden></span>
+      <span class="spacer"></span>
+      <select id="account-select" hidden title="GitHub account"></select>
+      <button id="fetch-btn" hidden>Fetch</button>
+      <button id="pull-btn" hidden>Pull</button>
+      <button id="push-btn" hidden>Push</button>
+    </header>
+
+    <div id="shell">
+      <aside id="sidebar">
+        <div class="side-head">
+          Repositories
+          <span class="side-actions">
+            <button id="rescan-btn" title="Rescan folders">↻</button>
+            <button id="add-dir-btn" title="Add a repos folder">+</button>
+          </span>
+        </div>
+        <div id="repo-groups"></div>
+      </aside>
+
+      <div id="content">
+        <nav id="tabs">
+          <button class="tab active" data-tab="dash">Dashboard</button>
+          <button class="tab" data-tab="cal">Calendar</button>
+          <button class="tab" data-tab="changes">Changes</button>
+          <button class="tab" data-tab="history">History</button>
+          <button class="tab" data-tab="prs">Pull Requests</button>
+        </nav>
+
+        <main>
+          <section id="tab-dash" class="tab-panel">
+            <div class="board-toolbar">
+              <button id="new-ticket-btn">+ New ticket</button>
+              <button id="sync-btn" hidden>Sync GitHub issues</button>
+            </div>
+            <div id="tiles">
+              <div class="tile"><div class="tile-num" id="stat-commits">–</div><div class="tile-label">Total commits</div></div>
+              <div class="tile"><div class="tile-num" id="stat-open">0</div><div class="tile-label">Open tickets</div></div>
+              <div class="tile"><div class="tile-num warn" id="stat-due">0</div><div class="tile-label">Due in 24h</div></div>
+              <div class="tile"><div class="tile-num danger" id="stat-overdue">0</div><div class="tile-label">Overdue</div></div>
+            </div>
+            <h2 class="section-head">Coming up</h2>
+            <div id="upcoming"></div>
+            <details id="completed"><summary>Completed</summary><div id="done-list"></div></details>
+          </section>
+
+          <section id="tab-cal" class="tab-panel" hidden>
+            <div class="cal-toolbar">
+              <button id="cal-prev">‹</button>
+              <span id="cal-title"></span>
+              <button id="cal-next">›</button>
+              <span class="spacer"></span>
+              <span id="cal-legend"></span>
+            </div>
+            <div id="cal-grid"></div>
+          </section>
+
+          <section id="tab-changes" class="tab-panel" hidden>
+            <ul id="changes-list"></ul>
+            <div id="commit-box">
+              <input id="commit-msg" placeholder="Commit message" />
+              <button id="commit-btn">Commit all</button>
+            </div>
+          </section>
+
+          <section id="tab-history" class="tab-panel" hidden>
+            <ul id="history-list"></ul>
+          </section>
+
+          <section id="tab-prs" class="tab-panel" hidden>
+            <ul id="pr-list"></ul>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <dialog id="ticket-dialog">
+      <form method="dialog" id="ticket-form">
+        <h2 id="ticket-dialog-title">New ticket</h2>
+        <label>Title <input name="title" required maxlength="120" /></label>
+        <label>Description <textarea name="description" rows="4"></textarea></label>
+        <label>Deadline <input name="deadline" type="datetime-local" /></label>
+        <div class="dialog-actions">
+          <button value="cancel" formnovalidate>Cancel</button>
+          <button value="ok" id="ticket-save">Save</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="comments-dialog">
+      <h2 id="comments-title"></h2>
+      <div id="comments-list"></div>
+      <form method="dialog" class="dialog-actions"><button>Close</button></form>
+    </dialog>
+
+    <div id="toast" hidden></div>
+  </body>
+</html>
