@@ -1,4 +1,4 @@
-# project-management
+# miko-flow
 
 A Tauri desktop app: GitHub Desktop + Jira, in one matte dark-grey window.
 

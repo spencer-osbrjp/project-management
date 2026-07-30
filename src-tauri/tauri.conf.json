@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "project-management",
+  "productName": "miko-flow",
   "version": "0.1.0",
-  "identifier": "com.spencer-osbr.project-management",
+  "identifier": "com.spencer-osbr.miko-flow",
   "build": {
     "frontendDist": "../src"
   },
@@ -10,7 +10,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "project-management",
+        "title": "miko-flow",
         "width": 1150,
         "height": 750,
         "minWidth": 860,
