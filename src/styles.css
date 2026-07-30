@@ -444,6 +444,15 @@ main { flex: 1; overflow: auto; padding: 18px; }
 }
 .deadline.soon { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, transparent); background: color-mix(in srgb, var(--warn) 12%, transparent); }
 .deadline.overdue { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, transparent); background: color-mix(in srgb, var(--danger) 12%, transparent); }
+.t-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* badge and buttons both hug the right edge */
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: auto;
+  text-align: right;
+}
 .ticket-row .actions { display: flex; gap: 4px; }
 .ticket-row .actions button[data-del]:hover { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 55%, transparent); }
 .ticket-row .actions button[data-done]:hover, .ticket-row .actions button[data-reopen]:hover { color: var(--accent); }
@@ -605,7 +614,7 @@ dialog textarea { resize: vertical; line-height: 1.5; min-height: 140px; }
 .md-tools svg { width: 16px; height: 16px; }
 
 .editor-body { background: var(--panel-2); }
-#ticket-form .editor textarea {
+.editor textarea {
   width: 100%;
   display: block;
   border: none;
@@ -617,7 +626,7 @@ dialog textarea { resize: vertical; line-height: 1.5; min-height: 140px; }
   font-size: 0.92rem;
   line-height: 1.6;
 }
-#ticket-form .editor textarea:focus { outline: none; }
+.editor textarea:focus { outline: none; }
 #md-preview {
   padding: 12px 14px;
   min-height: 180px;
@@ -683,13 +692,21 @@ dialog textarea { resize: vertical; line-height: 1.5; min-height: 140px; }
 #comments-dialog {
   width: min(720px, 92vw);
   max-height: 84vh;
-  display: flex;
-  flex-direction: column;
   overflow: hidden;
 }
-#comments-list { flex: 1; overflow: auto; margin-bottom: 14px; }
+/* [open] is required: a bare `display:flex` overrides the UA's display:none
+   for a closed dialog, leaving it permanently on screen and unclosable */
+#comments-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+/* basis auto so the thread sizes to its content (flex-basis:0 collapses it to
+   nothing in an auto-height dialog); shrink 1 + min-height:0 so a long thread
+   scrolls instead of pushing the composer past the clipped edge */
+#comments-list { flex: 0 1 auto; min-height: 0; overflow: auto; margin-bottom: 14px; }
+#comment-editor, #comments-dialog .dialog-actions, #comments-title { flex-shrink: 0; }
 #comment-editor .editor { margin-bottom: 12px; }
-#comment-editor textarea { min-height: 96px !important; }
+#comment-editor textarea { min-height: 110px; }
 #comment-send { background: var(--accent); color: var(--bg); border-color: var(--accent); }
 #comment-send:hover {
   background: color-mix(in srgb, var(--accent) 88%, #fff);

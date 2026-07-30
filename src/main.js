@@ -51,6 +51,15 @@ function toast(msg, isError = false) {
 }
 
 // ---------- repo ----------
+// any remote on github.com counts — plenty of repos name theirs something other than "origin"
+async function hasGithubRemote(path) {
+  try {
+    return (await invoke("git", { path, args: ["remote", "-v"] })).includes("github.com");
+  } catch {
+    return false;
+  }
+}
+
 async function connect(path) {
   try {
     await invoke("git", { path, args: ["rev-parse", "--is-inside-work-tree"] });
@@ -61,10 +70,7 @@ async function connect(path) {
   repo = path;
   db.lastRepo = path;
   persist();
-  ghRemote = false;
-  try {
-    ghRemote = (await git(["remote", "get-url", "origin"])).includes("github.com");
-  } catch {}
+  ghRemote = await hasGithubRemote(path);
   $("#sync-btn").hidden = !(ghOk && ghRemote);
   $("#repo-name").textContent = path.split("/").pop();
   $("#repo-name").classList.remove("muted");
@@ -529,13 +535,15 @@ function ticketRow(t, done, rp) {
       <div class="title">${badge}${who}${t.issue ? `<span class="issue">#${t.issue}</span> ` : ""}${esc(t.title)}</div>
       ${t.description ? `<div class="desc">${esc(plain(t.description))}</div>` : ""}
     </div>
+    <div class="t-side">
     <span class="deadline ${d.cls}">${d.label}</span>
     <span class="actions">
       ${act("data-edit", "edit", "Edit")}
       ${done ? act("data-reopen", "reopen", "Reopen") : act("data-done", "check", "Mark done")}
-      ${t.issue ? act("data-comments", "comment", "View comments") : ""}
+      ${t.issue ? act("data-comments", "comment", "View comments") : act("data-issue", "issue", "Create a GitHub issue for this ticket")}
       ${act("data-del", "trash", "Delete")}
     </span>
+    </div>
   </div>`;
 }
 
@@ -675,6 +683,7 @@ $("#tab-dash").addEventListener("click", (e) => {
   else if ("done" in ds) setStatus(t, "done", rp);
   else if ("reopen" in ds) setStatus(t, "open", rp);
   else if ("comments" in ds) viewComments("issue", t.issue, rp);
+  else if ("issue" in ds) createIssue(t, rp); // no issue yet — comments need one to live on
   else if ("del" in ds) {
     list.splice(list.indexOf(t), 1);
     saveTickets();
@@ -851,14 +860,9 @@ $("#ticket-dialog").onclose = () => {
 };
 
 async function createIssue(t, path = repo) {
-  const noRemote = () => toast("Ticket saved locally (no GitHub remote / gh login)");
-  if (!ghOk) return noRemote();
-  try {
-    const origin = await invoke("git", { path, args: ["remote", "get-url", "origin"] });
-    if (!origin.includes("github.com")) return noRemote();
-  } catch {
-    return noRemote();
-  }
+  if (!ghOk) return toast("Ticket saved locally — run `gh auth login` to create issues", true);
+  if (!(await hasGithubRemote(path)))
+    return toast(`Ticket saved locally — ${path.split("/").pop()} has no GitHub remote`, true);
   try {
     let body = t.description || "";
     if (t.deadline) body += `\n\nDeadline: ${t.deadline}`;
