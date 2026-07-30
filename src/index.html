@@ -12,10 +12,10 @@
       <span id="repo-name" class="muted">No repository connected</span>
       <span id="repo-branch" class="badge" hidden></span>
       <span class="spacer"></span>
-      <select id="account-select" hidden title="GitHub account"></select>
-      <button id="fetch-btn" hidden>Fetch</button>
-      <button id="pull-btn" hidden>Pull</button>
-      <button id="push-btn" hidden>Push</button>
+      <select id="account-select" hidden aria-label="GitHub account" data-tip="GitHub account"></select>
+      <button id="fetch-btn" data-icon="fetch" data-tip="Fetch all remotes" hidden>Fetch</button>
+      <button id="pull-btn" data-icon="pull" data-tip="Pull from origin" hidden>Pull</button>
+      <button id="push-btn" data-icon="push" data-tip="Push to origin" hidden>Push</button>
     </header>
 
     <div id="shell">
@@ -23,8 +23,8 @@
         <div class="side-head">
           Repositories
           <span class="side-actions">
-            <button id="rescan-btn" title="Rescan folders">↻</button>
-            <button id="add-dir-btn" title="Add a repos folder">+</button>
+            <button id="rescan-btn" title="Rescan folders" aria-label="Rescan folders">↻</button>
+            <button id="add-dir-btn" title="Add a repos folder" aria-label="Add a repos folder">+</button>
           </span>
         </div>
         <div id="repo-groups"></div>
@@ -37,13 +37,35 @@
           <button class="tab" data-tab="changes">Changes</button>
           <button class="tab" data-tab="history">History</button>
           <button class="tab" data-tab="prs">Pull Requests</button>
+          <button class="tab" data-tab="notes">Notes</button>
         </nav>
 
         <main>
           <section id="tab-dash" class="tab-panel">
             <div class="board-toolbar">
-              <button id="new-ticket-btn">+ New ticket</button>
-              <button id="sync-btn" hidden>Sync GitHub issues</button>
+              <button id="new-ticket-btn" data-icon="plus" data-tip="Create a ticket (and a GitHub issue)">New ticket</button>
+              <button id="sync-btn" data-icon="sync" data-tip="Import open GitHub issues as tickets" hidden>Sync issues</button>
+              <span class="spacer"></span>
+              <input id="filter-text" type="search" placeholder="Search title or description…" aria-label="Search tickets" />
+            </div>
+            <div class="filters">
+              <select id="filter-status" aria-label="Filter by deadline" data-tip="Deadline">
+                <option value="">All open</option>
+                <option value="overdue">Overdue</option>
+                <option value="soon">Due in 24h</option>
+                <option value="dated">Has deadline</option>
+                <option value="none">No deadline</option>
+              </select>
+              <select id="filter-repo" aria-label="Filter by repository" data-tip="Repository"></select>
+              <select id="filter-assignee" aria-label="Filter by assignee" data-tip="Assignee"></select>
+              <span class="date-range" data-tip="Only tickets due inside this range">
+                Due
+                <input type="date" id="filter-from" aria-label="Due from" />
+                <span>→</span>
+                <input type="date" id="filter-to" aria-label="Due until" />
+              </span>
+              <button id="filter-clear" data-tip="Clear all filters" hidden>Clear</button>
+              <span id="filter-count" class="meta"></span>
             </div>
             <div id="tiles">
               <div class="tile"><div class="tile-num" id="stat-commits">–</div><div class="tile-label">Total commits</div></div>
@@ -58,9 +80,10 @@
 
           <section id="tab-cal" class="tab-panel" hidden>
             <div class="cal-toolbar">
-              <button id="cal-prev">‹</button>
+              <button id="cal-prev" aria-label="Previous month">‹</button>
               <span id="cal-title"></span>
-              <button id="cal-next">›</button>
+              <button id="cal-next" aria-label="Next month">›</button>
+              <button id="cal-today">Today</button>
               <span class="spacer"></span>
               <span id="cal-legend"></span>
             </div>
@@ -71,7 +94,7 @@
             <ul id="changes-list"></ul>
             <div id="commit-box">
               <input id="commit-msg" placeholder="Commit message" />
-              <button id="commit-btn">Commit all</button>
+              <button id="commit-btn" data-icon="commit" data-tip="Stage everything and commit">Commit all</button>
             </div>
           </section>
 
@@ -82,6 +105,13 @@
           <section id="tab-prs" class="tab-panel" hidden>
             <ul id="pr-list"></ul>
           </section>
+
+          <section id="tab-notes" class="tab-panel" hidden>
+            <div class="board-toolbar">
+              <button id="new-note-btn" data-icon="plus" data-tip="Add a note to this repository">New note</button>
+            </div>
+            <div id="notes-list"></div>
+          </section>
         </main>
       </div>
     </div>
@@ -89,9 +119,14 @@
     <dialog id="ticket-dialog">
       <form method="dialog" id="ticket-form">
         <h2 id="ticket-dialog-title">New ticket</h2>
+        <label id="repo-field">Repository <select name="repo"></select></label>
         <label>Title <input name="title" required maxlength="120" /></label>
-        <label>Description <textarea name="description" rows="4"></textarea></label>
-        <label>Deadline <input name="deadline" type="datetime-local" /></label>
+        <span class="editor-label">Description</span>
+        <div id="ticket-editor"></div>
+        <div class="row">
+          <label>Deadline date <input name="date" type="date" /></label>
+          <label>Time <input name="time" type="time" /></label>
+        </div>
         <div class="dialog-actions">
           <button value="cancel" formnovalidate>Cancel</button>
           <button value="ok" id="ticket-save">Save</button>
@@ -102,9 +137,13 @@
     <dialog id="comments-dialog">
       <h2 id="comments-title"></h2>
       <div id="comments-list"></div>
-      <form method="dialog" class="dialog-actions"><button>Close</button></form>
+      <div id="comment-editor"></div>
+      <div class="dialog-actions">
+        <form method="dialog"><button>Close</button></form>
+        <button id="comment-send" data-icon="comment" data-tip="Post to GitHub (⌘↵)">Comment</button>
+      </div>
     </dialog>
 
-    <div id="toast" hidden></div>
+    <div id="toast" role="status" aria-live="polite" hidden></div>
   </body>
 </html>
