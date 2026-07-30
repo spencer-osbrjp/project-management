@@ -1,0 +1,17 @@
+name: Slack release notification
+
+on:
+  push:
+    branches: [release]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post to Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -sf -X POST -H 'Content-type: application/json' \
+            --data "{\"text\": \":rocket: *miko-flow* released — <${{ github.event.compare }}|${{ github.sha }}> by ${{ github.actor }}\"}" \
+            "$SLACK_WEBHOOK_URL"
